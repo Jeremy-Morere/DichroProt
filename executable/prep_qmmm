@@ -1,0 +1,158 @@
+#!/bin/bash
+
+#Generate all file need by amber in order to launch calculation.
+
+input=$1
+
+# Read input
+pdb_file=`grep 'PDB' $input | awk '{print $3}'`
+prmtop_file=`grep 'PRMTOP' $input | awk '{print $3}'`
+lot=`grep 'Level of theory' $input | awk '{print $5}'`
+NStates=`grep 'Number of state' $input | awk '{print $5}'`
+
+# STEP 1: Generate geometry file
+
+geometry $pdb_file
+
+# Step 2: Create rst file
+
+if [ ! -f "protein.rst" ]; then
+   module load amber/16
+   echo "parm $prmtop_file
+trajin $pdb_file
+
+trajout protein.rst restart" > trajin
+   cpptraj < trajin
+fi
+
+# Step 3: Create Amber input file
+#Create gaussian template
+echo "# $lot TD=NStates=$NStates" > gau_job.tpl
+
+#Create mdgau-min template
+echo "production
+&cntrl
+
+! TYPE OF JOB (MINIMIZATION, HEATING, OR PRODUCTION)
+imin=1,                  ! 1 = minimization, 0 = MD production (or heating)
+
+! GENERAL KEYWORDS
+iwrap=1,                 ! Pack the molecule, if periodic boundary conditions
+irest=0,                 ! Random initial velocities (irest = 0), or read initial velocities from file (irest = 1)
+ntx=1,                   ! Option to read the initial coordinates, velocities and box size from the inpcrd file.
+                         ! 1 = Coordinates, but no velocities, will be read. 5 = Coordinates and velocities will be read.
+igb=0,                   ! 0 = No generalized Born term is used. (Default)
+cut=9.0,                 ! This is used to specify the nonbonded cutoff, in Angstroms. 8.0-9.0 are usually good values.
+ifqnt=1,                 ! Flag for QM/MM run;  if set to 1, you must also include a &qmmm namelist.
+
+! MINIMIZATION KEYWORDS (ONLY APPLY IF IMIN = 1)
+maxcyc=1,             ! The maximum number of cycles of minimization. Default = 1.
+ntmin=1,                 ! Enable steepest descent up to ncyc cycles, then conjugate gradient minimization
+ncyc=1,               ! Number of steepest descent cycles in minimization
+
+! PRODUCTION KEYWORDS
+nstlim=1,             ! Number of steps, only if imin=0 (molecular dynamics)
+dt=0.001,                ! Time step, in picoseconds.
+ntpr=1,                ! Print to the Amber output file every ntpr cycles
+ntwx=1,                 ! Every ntwx steps, the coordinates will be written to the mdcrd file
+ntwr=1,                 !Write the restart file every ntwr steps
+ntwv=1,                  ! Write velocities every ntwv step. 0 = no velocity file, -1 = velocities into mdcrd, >1 = create velocity file
+ntt=3,gamma_ln=1,        ! Temperature scaling. 3 = Langevin  dynamics  with  the  collision  frequency given by gamma_ln
+temp0=300.0,             ! Reference temperature at which the system is to be kept, also final temperature of thermostat. Default 300 K.
+                         ! HEATING SECTION
+tempi=300.0,               ! Initial thermostat temperature in K
+ntp=1,                   ! Flag for pressure control. 0 = no pressure control (for heating), 1 = MD with constant pressure (isotropic position scaling)
+!barostat=2,              ! Barostat to control the pressure. 1 = Berendsen, 2 = Monte Carlo (preferred)
+ntb=2,                   ! Control if periodic boundaries are imposed. 1= constant volume NVT (heating), 2 = constant pressure NPT (production)
+ntf=1,ntc=1,             ! Force evaluation. 1 = complete interaction is calculated, 2 = bond interactions involving
+                         ! H-atoms omitted. ntc = 2 enables SHAKE algorithm.
+infe = 0,                ! =1 Activate free energy methods
+nmropt = 0,              ! =1 Activate constraints.
+/
+
+&qmmm
+qmmask = '@List of atom'
+qmcharge = 0,          ! charge on QM region (default = 0)
+spin = 1,              ! spin multiplicity of QM region (default = 1)
+qmshake = 0,            ! do not shake hydrogens
+qm_theory='EXTERN',
+qm_ewald=0,
+&end
+
+&gau
+use_template=1,
+num_threads = 8,
+/
+" > mdgau-min-tpl
+
+
+#Launch geometry analysis
+geometry $pdb_file
+
+Nresid=`head -n +1 geometry.dat | awk '{print $1}'`
+Narom=`head -n +1 geometry.dat | awk '{print $2}'`
+Nss=`head -n +1 geometry.dat | awk '{print $3}'`
+
+#Aromatic amino-acide
+for (( i=2; i<=$((Narom+1)); i++ )); do
+   
+   res=`head -n +$i geometry.dat | tail -n +$i | awk '{print $1}'`
+
+   mkdir R-arom-$res
+   cp $prmtop_file protein.rst gau_job.tpl R-arom-$res
+   cd R-arom-$res
+
+   #Head part
+   head -n +41 ../mdgau-min-tpl > mdgau-min
+ 
+   #List of atom
+   list_at=`head -n +$i ../geometry.dat | tail -n +$i | awk '{print $6}'`
+   echo "qmmask = '@$list_at'" >> mdgau-min
+
+   #Tail part
+   tail -n -12 ../mdgau-min-tpl>> mdgau-min
+
+  cd ..
+
+done
+
+#SS bridge
+for (( i=$((Narom + 2)); i<=$((Nresid+1)); i++ )); do
+
+   res1=`head -n +$i geometry.dat | tail -n +$i | awk '{print $1}'`
+   res2=`head -n +$i geometry.dat | tail -n +$i | awk '{print $2}'`
+
+   mkdir R-ss-$res1-$res2
+   cp $prmtop_file protein.rst gau_job.tpl R-ss-$res1-$res2
+   cd R-ss-$res1-$res2
+
+   #Head part
+   head -n +41 ../mdgau-min-tpl > mdgau-min
+
+   #List of atom
+   list_at=`head -n +$i ../geometry.dat | tail -n +$i | awk '{print $7}'`
+   echo "qmmask = '@$list_at'" >> mdgau-min
+
+   #Tail part
+   tail -n -12 ../mdgau-min-tpl>> mdgau-min
+   
+   cd ..   
+
+done
+
+# STEP 4: Create submition file
+echo "#!/bin/bash
+#SBATCH -N 1
+#SBATCH -p std
+#SBATCH -J CD-amber
+#SBARCH -n 16
+#SBATCH -t 16-00:00:00
+
+module purge
+module load amber/16
+module load gaussian/09/pgi
+
+sander -O -i mdgau-min -o test.out -c protein.rst -p $prmtop_file -r test.rst -x test.rst
+" > submith.sh
+
+echo "Check the submith.sh and gau_job.tpl files before using launch_qmmm"

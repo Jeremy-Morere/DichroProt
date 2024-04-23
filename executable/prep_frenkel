@@ -1,0 +1,66 @@
+#!/bin/bash
+
+input=$1
+
+mkdir frenkel_spectrum
+pdb_file=`grep 'PDB' $input | awk '{print $3}'`
+
+echo `pwd`
+
+for res in R-* 
+do 
+ mv $res/old.gau_job.log frenkel_spectrum/$res.log
+ rm -rf $res
+done
+
+cp $pdb_file frenkel_spectrum
+
+cd frenkel_spectrum 
+
+#Preparation of the Frenkel input
+
+echo '#%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
+# Input for Frenkel coupling #
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
+
+#List of gaussian 09 log
+#One per residus
+#These files must be in the same directory
+#that this input file
+
+#--Aromatic--#' > FrenkelInput
+
+for res in R-arom-*.log
+do
+ if [[ "$res" != "R-arom-*.log" ]]; then
+  foo=${res%".log"}
+  foo=${foo#"R-arom-"}
+  echo "$res $foo" >> FrenkelInput
+ fi
+done
+
+echo '#--SS Bridge--#' >> FrenkelInput
+
+for res in R-ss-*.log
+do
+ if [[ "$res" != "R-ss-*.log" ]]; then
+  foo=${res%".log"}
+  foo=${foo#"R-ss-"}
+  IFS=- read -r foo1 foo2 <<< $foo 
+  echo "$res $foo1 $foo2" >> FrenkelInput
+ fi
+done
+
+echo '#----#
+' >> FrenkelInput
+
+grep PDB ../$input >> FrenkelInput
+
+echo '
+##Parameter for Frenkel coupling' >> FrenkelInput
+
+awk '/Type/{flag=1} flag; /function/{flag=1}' ../$input >> FrenkelInput
+
+
+echo `pwd`
+

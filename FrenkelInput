@@ -1,0 +1,60 @@
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
+# Input for Frenkel coupling #
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
+
+#List of gaussian 09 log
+#One per residus
+#These files must be in the same directory
+#that this input file
+
+##Parameter for Amber and gaussian
+
+#--Aromatic--#
+ 121
+ 28
+ 62
+ 63
+ 6
+ 75
+ 79
+ 92
+ 96
+ 119
+ 118
+ 42
+ 76
+ 94
+ 98
+#--SS Bridge--#
+#----#
+
+PDB :		2phy-rep0.pdb
+PRMTOP :	2phy_box.prmtop
+
+Level of theory : B3LYP/6-311+G*e
+Number of state : 20
+
+##Parameter for Frenkel coupling
+#Type of coupling (chose one)
+Strongest transition    n
+All combinaison         n 
+Extend transition       y
+Superposition           n
+
+#If all combinaison chose
+#Specify the number of excited state
+number excited state :  9
+
+#Specify the spectral window (nm)
+lower limit :    250
+upper limit :    550
+
+##Parameter for convolution (Don't touch)
+#Resolution (eV)
+resolution :     0.0001
+
+#Full width at half maximum (eV)
+fwhm :    0.2 
+
+#Convolute with Gaussian or Lorentzienne function
+function : L (G or L)

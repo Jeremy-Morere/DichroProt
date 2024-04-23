@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#Launch QMMM directory and file for each residus
+
+Nresid=`head -n +1 geometry.dat | awk '{print $1}'`
+
+for rep in R-*/ ; do
+   #echo "$rep"
+   cd $rep
+   cp ../submith.sh .
+   sbatch submith.sh
+   cd ..
+done
+
+N=0
+while [ $N -lt $Nresid ]; do
+   sleep 60
+   N=0
+   for rep in R-*/ ; do
+      cd $rep
+      if [ -f "old.gau_job.log" ]; then
+         N=$(( N + 1 ))
+      fi
+      cd ..
+   done
+done
+
+prep_frenkel QmmmInput
+
+cd frenkel_spectrum
+frenkel FrenkelInput
+cd ..
+

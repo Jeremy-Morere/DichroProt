@@ -1,0 +1,14 @@
+#!/bin/bash
+
+input=$1
+
+N_frame=`grep 'Number of frame' $input | awk '{print $5}'`
+
+
+for (( i=1; $i<=$((N_frame)); i++ )); do
+
+cd frame_$i
+   launch_qmmm QmmmInput
+cd ..
+
+done

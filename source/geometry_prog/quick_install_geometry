@@ -1,0 +1,5 @@
+#!/bin/bash
+
+ifort declare.f90 deal.f90 main_geometry.f90 -o geometry
+
+rm deal.mod declare.mod

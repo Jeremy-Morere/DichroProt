@@ -1,0 +1,78 @@
+subroutine cpl_perturbation
+
+!Couple every transition and residu following the matrix method
+
+use declare
+implicit none
+real*8 :: dip_dip 
+
+write(6,'(A37)') "#-Coupling with the perturbation method"
+output="perturbation"
+!Computation of rotational strength
+allocate(energy_c(Nresid*Nstate))
+allocate(rot_c(Nresid*Nstate))
+
+energy_c = 0.0d0
+rot_c    = 0.0d0
+
+do ri=1,Nresid
+ do si=1,Nstate
+  
+  !
+  i = (ri-1)*Nstate+si
+  energy_c(i) = energy(ri,si)
+
+  if (energy_c(i) .lt. 1.981020d-1 ) then !in au
+
+   !FIRST : compute energy
+   energy_c(i) = energy(ri,si)*2.7211407953d1 !au to eV
+
+   !SECOND : compute CD
+   !Tinoco IIIB-22a
+   rot_c(i) = rot_c(i) + DOT_PRODUCT(mag_dip(ri,si,:),el_dip(ri,si,:))
+
+   do r1 = 1,Nresid
+    if (r1 .ne. ri) then
+
+     !Tinoco IIIB-22e
+     if (ground_energy(ri) .lt. 1.981020d-1 ) then !in au
+      vect(:) = el_dip_perm(ri,si,:) - el_dip_perm(r1,s1,:)
+      tempo = -DOT_PRODUCT(vect(:),mag_dip(ri,si,:))
+      rot_c(i) = rot_c(i) - tempo*dip_dip(ri,0,si,r1,0,0)/energy(ri,si)
+     endif
+
+     do s1 = 1,Nstate
+      !Tinoco IIIB-22b
+      if (energy(ri,si) .lt. 1.981020d-1 ) then !in au
+       tempo = energy(ri,si)*DOT_PRODUCT(el_dip(ri,si,:),mag_dip(r1,s1,:)) &
+        -energy(r1,s1)*DOT_PRODUCT(el_dip(r1,s1,:),mag_dip(ri,si,:))
+        rot_c(i) = rot_c(i) &
+           -2*tempo*dip_dip(ri,0,si,r1,0,s1)/(energy(r1,s1)**2-energy(ri,si)**2)
+      endif
+      !Tinoco IIIB-22f
+      if (energy(ri,si) .lt. 1.981020d-1 ) then !in au
+       cross(1) = el_dip(r1,s1,2)*el_dip(ri,si,3)-el_dip(r1,s1,3)*el_dip(ri,si,2) 
+       cross(2) = el_dip(r1,s1,3)*el_dip(ri,si,1)-el_dip(r1,s1,1)*el_dip(ri,si,3)
+       cross(3) = el_dip(r1,s1,1)*el_dip(ri,si,2)-el_dip(r1,s1,2)*el_dip(ri,si,1)
+       tempo = DOT_PRODUCT(R(r1,ri,:),cross(:))
+ 
+       rot_c(i) = rot_c(i) &
+           -137*dip_dip(ri,0,si,r1,0,s1)*tempo*energy(ri,si)*energy(r1,s1)/(energy(r1,s1)**2-energy(ri,si)**2)
+      endif
+     enddo
+
+    endif
+   enddo
+
+   rot_c(i) = rot_c(i)*4.714436d2 !au to 10**-40 esu.erg.cm/G
+
+  endif
+
+ enddo
+enddo
+
+call convolution
+
+deallocate(rot_c,energy_c)
+
+end

@@ -7,26 +7,26 @@ use declare
 implicit none
 
 !Initialization
-allocate(massecenter(Nresid,3))
-massecenter = 0.0d0
+allocate(chargecenter(Nresid,3))
+chargecenter = 0.0d0
 
 do i=1,Nresid !For each rediues
  !Compute the sum of atomic number
-   Mass = 0.0d0
+   Charge = 0.0d0
    do a=1,Natom(i)
-      Mass = Mass + atom_mass(i,a)
+      Charge = Charge + atom_charge(i,a)
 
    enddo
  !Compute center without ponderation
    do a=1,Natom(i)
-      massecenter(i,1) = massecenter(i,1) + atom_mass(i,a)*atom_coord(i,a,1)
-      massecenter(i,2) = massecenter(i,2) + atom_mass(i,a)*atom_coord(i,a,2)
-      massecenter(i,3) = massecenter(i,3) + atom_mass(i,a)*atom_coord(i,a,3)
+      chargecenter(i,1) = chargecenter(i,1) + atom_charge(i,a)*atom_coord(i,a,1)
+      chargecenter(i,2) = chargecenter(i,2) + atom_charge(i,a)*atom_coord(i,a,2)
+      chargecenter(i,3) = chargecenter(i,3) + atom_charge(i,a)*atom_coord(i,a,3)
    enddo
  !Ponderate by the sum
-   massecenter(i,:) = massecenter(i,:)/Mass
+   chargecenter(i,:) = chargecenter(i,:)/Charge
 enddo
 
-
+deallocate(atom_coord,atom_charge)
 
 end

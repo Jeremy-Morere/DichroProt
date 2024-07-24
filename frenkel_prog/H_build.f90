@@ -32,7 +32,7 @@ enddo
 
 
 !~~~~~~~~~~~~~~~~~~~~~~~~
-if (.true.) then
+if (.false.) then
 open(10,file='H_eff.dat')
 
 write(filename,'(a2,i2,a7)') "'(", Nband, "f10.5)'"

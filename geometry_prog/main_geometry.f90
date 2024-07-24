@@ -17,10 +17,10 @@ call rpdb
 !STEP 3: Compute centre of molecule
 call com
 
-!STEP 4: Compute centre of molecule
+!STEP 4: find partner of each cystein
 call store_ss
 
-!STEP 7: Select residu to put in the same qmmm partition
+!STEP 5: Select residu to put in the same qmmm partition
 
 if (.false.) then
 

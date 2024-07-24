@@ -5,12 +5,12 @@ subroutine rlog
 use declare
 implicit none
 
-!FIRST PART: Find numbers of transition and atom for each residue
-allocate(stateresid(Nresid))
+!FIRST PART: Read numbers of atom and center of charge for each residue
 allocate(Natom(Nresid))
+Natom = 0
 
 do i=1,Nresid
- open(10,file=TRIM(namegaus(i))//"-S1.log",form='formatted')
+open(10,file=TRIM(namegaus(i))//"-S1.log",form='formatted')
  do
   read(10,'(A128)',iostat=error) line
   if (error .ne. 0) exit
@@ -22,8 +22,8 @@ do i=1,Nresid
 close(10)
 enddo
 
-stateresid(:) = Nstate
 
+!SECONDE PART: Acquiring the data from the gaussian output files.
 Maxatom = maxval(Natom)
 
 allocate(energy(Nresid,Nstate))
@@ -38,9 +38,9 @@ el_dip = 0.0d0
 el_dip = 0.0d0
 rotatory = 0.0d0
 freq = 0.0d0
-Nband = 0        
+Nband = 0
 
-!SECONDE PART: Acquiring the data from the gaussian output files.
+
 do ri=1,Nresid
    filename="-S1.log"
    open(10,file=trim(namegaus(ri))//"-S1.log",form='formatted')
@@ -57,7 +57,7 @@ do ri=1,Nresid
       !Read the electric transition dipole moments
       if (line(1:65) .eq. ' Ground to excited state transition electric dipole moments (Au):' ) then
          read(10,'(A128)') line
-         do si=1,stateresid(ri)
+         do si=1,Nstate
             read(10,'(13x,3f12.4)') el_dip(ri,si,1),el_dip(ri,si,2),el_dip(ri,si,3)
          enddo
       endif
@@ -65,7 +65,7 @@ do ri=1,Nresid
       !Read magnetic transition dipole moments
       if (line(1:65) .eq. ' Ground to excited state transition magnetic dipole moments (Au):' ) then
          read(10,'(A128)') line
-         do si=1,stateresid(ri)
+         do si=1,Nstate
             read(10,'(13x,3f12.4)') mag_dip(ri,si,1),mag_dip(ri,si,2),mag_dip(ri,si,3)
          enddo
       endif
@@ -83,7 +83,7 @@ do ri=1,Nresid
 
       !Read  the oscillator strenghts
       if (line(47:62) .eq. 'ZZ     R(length)') then
-         do si=1,stateresid(ri)
+         do si=1,Nstate
             read(10,'(A128)') line
             read(line,'(52x,f9.4)') rotatory(ri,si) !au
          enddo
@@ -172,7 +172,7 @@ endif
 
 
 
-if (.true.) then
+if (.false.) then
 do ti=1,Nband
  ri=transi_band(ti,1)
  si=transi_band(ti,2)

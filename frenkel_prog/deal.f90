@@ -15,10 +15,8 @@ if (allocated(transi_band)) deallocate(transi_band)
 if (allocated(ground_energy)) deallocate(ground_energy)
 if (allocated(energy)) deallocate(energy)
 if (allocated(atom_coord)) deallocate(atom_coord)
-if (allocated(atom_mass)) deallocate(atom_mass)
-if (allocated(masse)) deallocate(masse)
-if (allocated(massecenter)) deallocate(massecenter)
-if (allocated(coord)) deallocate(coord)
+if (allocated(atom_charge)) deallocate(atom_charge)
+if (allocated(chargecenter)) deallocate(chargecenter)
 if (allocated(R)) deallocate(R)
 if (allocated(Rn)) deallocate(Rn)
 if (allocated(el_dip)) deallocate(el_dip)
@@ -26,9 +24,6 @@ if (allocated(el_dip_perm)) deallocate(el_dip_perm)
 if (allocated(mag_dip)) deallocate(mag_dip)
 if (allocated(rotatory)) deallocate(rotatory)
 if (allocated(freq)) deallocate(freq)
-
-!option
-if (allocated(comb)) deallocate(comb)
 
 !Hamiltonian
 if (allocated(H)) deallocate(H)

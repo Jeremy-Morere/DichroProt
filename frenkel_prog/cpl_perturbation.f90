@@ -66,14 +66,13 @@ do ti=1,Nband
   endif
 
  enddo
-write(6,*) ri, si, rot_c(ti)*4.714436d2
 enddo
 
 rot_c = rot_c*4.714436d2 !au to 10**-40 esu.erg.cm/G
 
 
 !----------------
-if (.false.) then
+if ((.false.) .and. (full)) then
 write(6,'(7a15)') 'R', 'Tino a+f', '%','Tino_a', 'Tino_b', 'Tino_e', 'Tino_f'
 do ti=1,Nband
  ri=transi_band(ti,1)

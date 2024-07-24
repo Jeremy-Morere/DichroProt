@@ -26,7 +26,7 @@ integer,allocatable :: transi_band(:,:)
 !Residus and atoms properties
 real*8,allocatable :: energy(:,:), ground_energy(:), rotatory(:,:), freq(:,:)
 real*8,allocatable :: el_dip_perm(:,:,:), el_dip(:,:,:), mag_dip(:,:,:)
-real*8             :: Mass
+real*8             :: Charge
 character*2        :: at_type
 
 !option
@@ -53,9 +53,8 @@ real*8,allocatable :: lambda_c(:), absorb(:), absorb_UV(:)
 real*8             :: max_abs, min_abs, coeff
 
 !Geometry
-real*8,allocatable  :: atom_coord(:,:,:), atom_mass(:,:)
-real*8,allocatable  :: masse(:), massecenter(:,:)
-real*8,allocatable  :: coord(:,:)
+real*8,allocatable  :: atom_coord(:,:,:), atom_charge(:,:)
+real*8,allocatable  :: chargecenter(:,:)
 real*8,allocatable  :: R(:,:,:), Rn(:,:)
 real*8,allocatable  :: at_arom_1(:,:), at_arom_2(:,:)
 character*3         :: type_tempo, type_res

@@ -5,14 +5,15 @@ subroutine rinput
 use declare
 implicit none
 
+!Initialisation
 perturbation  = .false.
 matrix        = .false.
 full          = .false.
 
 call getarg(1,arg1)
 
-!read number of log file in geometry.dat
 
+!read number of log file in geometry.dat
 open(11,file="geometry.dat")
 read(11,'(3i6)') Nresid, Narom, Nss
 close(11)
@@ -45,70 +46,52 @@ do
 
    !read pdb file name
    if (line(1:5) .eq. 'PDB :') then
-      read(line(6:128),*) pdb_file
+    read(line(6:128),*) pdb_file
    endif
 
    !read number of state 
    if (line(1:17) .eq. 'Number of state :') then
-      read(line(18:128),*) Nstate 
+    read(line(18:128),*) Nstate 
    endif
 
    ! read if full contribution or not
-   if (line(1:19) .eq. 'Full calcultation :') then
-      read(line(20:128),*) full_t
+   if (line(1:19) .eq. 'Full contribution :') then
+    read(line(20:128),*) full_t
+    if (full_t .eq. 'y') full = .true.
    endif
 
    !read requested tasks
    if (line(1:14) .eq. 'Perturbation :') then
-      read(line(15:128),*) perturbation_t
+    read(line(15:128),*) perturbation_t
+    if (perturbation_t .eq. 'y') perturbation = .true.
    endif
 
    if (line(1:8) .eq. 'Matrix :') then
-      read(line(9:128),*) matrix_t
+    read(line(9:128),*) matrix_t
+    if (matrix_t .eq. 'y') matrix = .true.
    endif
    
 !Read spectra parameter
    !read spectral window
    if (line(14:28) .eq. 'spectral window') then
-      read(10,'(A128)') line
-      read(line(14:128),*) borneinf
-      read(10,'(A128)') line
-      read(line(14:128),*) bornesup
+    read(10,'(A128)') line
+    read(line(14:128),*) borneinf
+    read(10,'(A128)') line
+    read(line(14:128),*) bornesup
    endif
 
    !read spectrum resolution
    if (line(1:12) .eq. 'resolution :') then
-      read(line(13:128),*) dw
+    read(line(13:128),*) dw
    endif
 
    !read full width at half maximum
    if (line(1:6) .eq. 'fwhm :') then
-      read(line,'(6x,f8.2)') fwhm
+    read(line,'(6x,f8.2)') fwhm
    endif
    
 enddo
 
 close(10)
-
-if (full_t .eq. 'y') then
-   full = .true.
-endif
-if (perturbation_t .eq. 'y') then
-   perturbation = .true.
-endif
-if (matrix_t .eq. 'y') then
-   matrix = .true.
-endif
-
-npoint = floor((bornesup - borneinf)/dw)
-
-write(6,'(a1)') " "
-write(6,'(a15,f4.0,a1,f4.0,a3)') "Spectral band: ", borneinf, "-", bornesup, " nm"
-tempo = borneinf
-borneinf = 1239.8/bornesup !nm to eV
-bornesup = 1239.8/tempo    !nm to eV
-dw = (bornesup - borneinf)/npoint
-
-write(6,'(a1)') " "
 
 end

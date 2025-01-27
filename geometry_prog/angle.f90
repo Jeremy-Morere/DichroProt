@@ -1,8 +1,8 @@
 subroutine compute_angle
 
 !Compute Angle between:
-!1: normal vector and com vector
-!2: nomrla vectors
+!1: normal vector or vectors between center of charge 
+!2: normal vectors
 
 use declare
 implicit none

@@ -1,15 +1,17 @@
 subroutine rpdb
 
-!Read the .pdb file.
+!Read atomic coordinates in the .pdb file.
 
 use declare
 implicit none
 
+!Initialization
 allocate(atom_coord(Nresid,Maxatom,3))
 allocate(atom_charge(Nresid,Maxatom))
 atom_coord = 0.0d0
 atom_charge = 0.0d0
 
+!Open pdb file.
 open(10,file=pdb_file,form='formatted')
 do
    read(10,'(A128)',iostat=error) line
@@ -25,7 +27,7 @@ do
             read(10,'(A128)') line !Ignor backbone
             read(10,'(A128)') line
             
-            do a=1,Natom(i)
+            do a=1,Natom(i) !Each aromatic residue has a different number of atoms in the side chain.
                read(10,'(30x,3f8.3,23x,a1)') atom_coord(i,a,1), atom_coord(i,a,2), atom_coord(i,a,3),at_type
                if (at_type .eq. "H") atom_charge(i,a) = 1.0d0 
                if (at_type .eq. "C") atom_charge(i,a) = 6.0d0
@@ -72,7 +74,7 @@ enddo
 
 close(10)
 
-!coversion from A to au
+!Conversion from Ångstroms to atomic units (au).
 atom_coord = atom_coord*1.8897259886
 
 end

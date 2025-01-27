@@ -1,6 +1,6 @@
 function dip_dip(res1,s1i,s1f,res2,s2i,s2f) result(cpl)
 
-!Compute the coupling between two transition of two different residue
+!Compute the coupling between transitions of two different residues.
 use declare
 
 implicit none
@@ -23,7 +23,7 @@ if (res1 .ne. res2) then !Any coupling in the same residue
       PS3 = DOT_PRODUCT(R(res1,res2,:),el_dip(res2,s2f,:))
 
    else if (s2i .eq. s2f) then !1 with transition, 2 with permanent
-      PS1 = DOT_PRODUCT(el_dip(res1,s1f,:),el_dip(res2,s2f,:))
+      PS1 = DOT_PRODUCT(el_dip(res1,s1f,:),el_dip_perm(res2,s2f,:))
       PS2 = DOT_PRODUCT(R(res1,res2,:),el_dip(res1,s1f,:))
       PS3 = DOT_PRODUCT(R(res1,res2,:),el_dip_perm(res2,s2f,:))
 

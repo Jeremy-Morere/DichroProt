@@ -8,7 +8,7 @@ Nresid=`head -n +1 geometry.dat | awk '{print $1}'`
 prmtop_file=`grep 'PRMTOP' $input | awk '{print $3}'`
 lot=`grep 'Level of theory' $input | awk '{print $5}'`
 NStates=`grep 'Number of state' $input | awk '{print $5}'`
-full=`grep 'Full calculation' $input | awk '{print $4}'`
+full=`grep 'Full contribution' $input | awk '{print $4}'`
 
 work_file=`pwd`
 

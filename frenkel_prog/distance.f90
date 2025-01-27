@@ -1,7 +1,7 @@
 subroutine distance
 
 !Gives center of charge vectors and distance between residus.
-!The center is ponderate by atomic number.
+!The center is weighted by atomic number.
 
 use declare
 implicit none

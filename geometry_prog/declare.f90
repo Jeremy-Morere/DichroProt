@@ -27,7 +27,7 @@ real*8,allocatable :: el_dip(:,:,:),mag_dip(:,:,:),rotatory(:,:),freq(:,:)
 real*8 :: charge
 character*2 :: at_type
 
-!option
+!options
 logical :: stronghest,extend,allcomb,nocoupling
 integer,allocatable :: comb(:)
 
@@ -36,7 +36,7 @@ real*8,allocatable :: H(:,:),eigval(:),work(:)
 integer :: d,od1,od2
 integer :: r1,r2,s1,s2
 
-!Rotatory and oscillator strenght
+!Rotatory and oscillator strength
 real*8 :: PS1,PS2,PS3
 real*8 :: cross(3), vect(3)
 

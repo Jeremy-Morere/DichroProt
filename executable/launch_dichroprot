@@ -1,0 +1,131 @@
+#!/bin/bash
+
+input=$1
+
+N_frame=`grep 'Number of frame' $input | awk '{print $5}'`
+lower=`grep 'lower limit' $input | awk '{print $4}'`
+upper=`grep 'upper limit' $input | awk '{print $4}'`
+prmtop_file=`grep 'PRMTOP' $input | awk '{print $3}'`
+protein_name=${prmtop_file%".prmtop"}
+
+#mkdir spectrum/
+#
+#Gather information
+#for (( i=1; i<=$N_frame; i++ )); do
+#
+# cd frame_$i
+#  if [ ! -r frenkel_spectrum ]; then
+#   prep_frenkel QmmmInput
+#  fi  
+#
+#  cd frenkel_spectrum
+#
+#  frenkel FrenkelInput | tee frenkel_$i.out
+#  
+#  cp spectrum_matrix.conv        ../../spectrum/matrix_$i.conv
+#  cp spectrum_perturbation.conv  ../../spectrum/perturbation_$i.conv
+#  cp spectrum_superposition.conv ../../spectrum/superposition_$i.conv
+#  cp spectrum_UV.conv		 ../../spectrum/UV_$i.conv
+#  cp frenkel_$i.out              ../../spectrum/
+#
+# cd ../..
+##cd ..
+#done
+#
+#
+#Compute average
+cd spectrum/
+average_spectrum ../$input
+
+#Create gnuplot input
+echo "N = $N_frame
+
+reset
+
+set size square
+set xtics nomirror
+set xrange [$lower:$upper]
+set xlabel 'wavelength (nm)'
+set ytics  nomirror
+set ylabel 'CD (arbitrary unit)'
+set xzeroaxis
+
+#set title 'average $protein_name superposition'
+set terminal png
+set output 'superposition_average.png'
+plot 'superposition.conv' u 1:2 w l t 'Superposition'
+set output
+
+set title 'average $protein_name perturbation'
+set terminal png
+set output 'perturbation_average.png'
+plot 'perturbation.conv' u 1:2 w l t 'Perturbation'
+set output
+
+#set title 'average $protein_name matrix'
+set terminal png
+set output 'matrix_average.png'
+plot 'matrix.conv' u 1:2 w l t 'Matrix'
+set output
+
+#set title 'All $protein_name moyen'
+set terminal png
+set output 'average.png'
+plot 'matrix.conv' u 1:2 w l t 'Matrix', 'perturbation.conv' u 1:2 w l t 'Perturbation', 'superposition.conv' u 1:2 w l t 'Superposition'
+set output
+" > plot.p
+
+
+echo "do for [i= 1:N] {
+
+set size square
+set xtics nomirror
+set xrange [$lower:$upper]
+set xlabel 'wavelength (nm)'
+set ytics  nomirror
+set ylabel 'CD (arbitrary unit)'
+set xzeroaxis
+
+#set title '$protein_name superposition frame' .i
+set terminal png
+set output 'superposition_'.i.'.png'
+plot 'superposition_'.i.'.conv' u 1:2 w l t 'Superposition'
+set output
+
+#set title '$protein_name perturbation frame' .i
+set terminal png
+set output 'perturbation_'.i.'.png'
+plot 'perturbation_'.i.'.conv' u 1:2 w l t 'Perturbation'
+set output
+
+#set title '$protein_name matrix frame' .i
+set terminal png
+set output 'matrix_'.i.'.png'
+plot 'matrix_'.i.'.conv' u 1:2 w l t 'Matrix'
+set output
+
+#set title '$protein_name frame' .i
+set terminal png
+set output 'frame_'.i.'.png'
+plot 'matrix_'.i.'.conv' u 1:2 w l t 'Matrix', 'perturbation_'.i.'.conv' u 1:2 w l t 'Perturbation', 'superposition_'.i.'.conv' u 1:2 w l t 'Superposition'
+set output
+
+}" >> plot.p
+
+echo "
+set size square
+set xtics nomirror
+set xrange [$lower:$upper]
+set xlabel 'wavelength (nm)'
+set ytics  nomirror
+set ylabel 'Absorption (arbitrary unit)'
+set xzeroaxis
+
+#set title '$protein_name UV spectrum'
+set terminal png
+set output 'UV_spectrum.png'
+plot for [i= 1:N] 'UV_'.i.'.conv' u 1:2 w l notitle
+set output
+" >> plot.p
+
+gnuplot plot.p

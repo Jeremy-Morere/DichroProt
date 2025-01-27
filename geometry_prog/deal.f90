@@ -24,7 +24,7 @@ if (allocated(mag_dip)) deallocate(mag_dip)
 if (allocated(rotatory)) deallocate(rotatory)
 if (allocated(freq)) deallocate(freq)
 
-!option
+!options
 if (allocated(comb)) deallocate(comb)
 
 !Hamiltonian

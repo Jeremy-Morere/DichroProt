@@ -1,6 +1,6 @@
-subroutine com
+subroutine coc
 
-!Compute center of masse od each residus
+!Compute center of masse of each residus
 
 use declare
 implicit none

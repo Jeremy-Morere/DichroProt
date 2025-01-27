@@ -1,0 +1,86 @@
+The source repository  contains all programs and executables necessary to obtain a near-UV CD spectrum.
+
+frenkel_prog	 : Coupled gaussian 09 calculations; Generates a CD spectrum with or without coupling.
+geometry_prog	 : Analyses the protein structure from a .pdb; generates a geometry.dat file used to obtain the CD spectrum.
+other_prog	 : Other small programs for post-processing.
+exectutable	 : Contains all executables necessary to scan a trajectory (see Tutorial for more detail)
+
+
+#--Tutorial--#
+
+Necessary input files for a scan:
+        - topology file (.prmtop)
+        - trajectory (.dcd or .nc)
+Necessary input files for a snapshot
+        - topology file (.prmtop)
+        - geometry file (.pdb)
+
+--Description of executables--
+geometry:	 Spot Photo-active residus (PAR) and compute center of charge for a given conformation and other information.
+			-Inputs: .pdb file
+			-Outputs: geometry.dat file
+create_input:	 Generate global input, can be use for scan, qmmm or calculation.
+                        -Outputs: GlobalInput
+			-call: create_input_frenkel
+
+prep_scan:	 Prepare repositories for each conformation of a trajectory.
+                        -Inputs: .prmtop and .dcd/.nc files
+                        -Outputs: one repository per conformation (step of 20 along the trajectory) with every useful file for prep_qmmm exectutable
+                        -call: prep_scan GlobalInput
+prep_qmmm:	 Prepare repositories for each state for a given conformation (need: .prmtop and .pdb files ; call: prep_qmmm QmmmInput)
+                        -Inputs: .prmtop and .pdb files
+                        -Outputs: one repository per PAR, one calculation repository per requested state and QmmmInput
+                        -call: prep_qmmm QmmmInput
+prep_dichroprot: Gather G09 output in a frenkel_spectrum repository.
+                        -need: launch_qmmm output
+                        -Outputs: frenkel_spectrum calculation repository and FrenkelInput
+                        -call: prep_frenkel QmmmInput
+
+launch_scan:	 launch QMMM calculation of a trajectory.
+                        -Inputs: prep_scan output
+                        -call: launch_scan GlobalInput
+launch_qmmm:	 launch QMMM calculation for a given conformation.
+                        -Inputs: prep_qmmm output
+                        -call: launch_qmmm QmmmInput
+launch_idichroprot: launch CD calculation of a trajectory.
+                        -Inputs: launch_scan output
+                        -call: launch_frenkel GlobalInput
+
+dichroprot:	 Compute stick spectrum and convoluted spectrum for a given conformation (need: FrenkelInput, geometry.dat and G09_output ; call : frenkel frenkelInput)
+                        -Inputs: prep_frenkel output
+                        -call: frenkel FrenkelInput
+
+
+--Scan tutorial--
+
+1) Enter your working repository containing trajectory and topology files (.prmtop and .dcd/.nc)
+2) Launch `create_input` and adapt the GlobalInput file to your portein
+        -PRMTOP:       		protein.prmtop
+        -trajectory:   		protein.nc
+        -Level of theory: 	B3LYP/6-311+G**
+        -Number of state:	5	(Advice: A lot of transitions are missed below 5)
+        -Full contribution: 	n	(y : protein with few PAR or highly interacting PAR)
+3) Launch `prep_scan GlobalInput`
+4) Adapt the submith.sh to your architecture and gau_job.tpl if you need to add specific keywords for the gaussian calculation.
+5) Launch `launch_scan GlobalInput` (It will launch every qmmm calculations)
+6) When every Qmmm calculations end, check if any crashed and relaunch them, following step 1-2 of Conformation tutorial.
+7) Launch `launch_dichroprot GlobalInput`
+8) iAll output files will be gathered in the spectrum repository.
+
+
+--Conformation tutorial--
+1) Enter your working repository containing structure and topology files (.prmtop and .pdb)
+2) Launch `create_input` and adapt GlobalInput file to your portein
+	-PDB :           protein.pdb
+        -PRMTOP :        protein.prmtop
+        -Level of theory : B3LYP/6-311+G**
+        -Number of state : 5                    (Advice: A lot of transitions are missed below 5)
+        -Full contribution : n                  (y : protein with few PAR or highly interacting PAR)
+3) Launch `prep_qmmm GlobalInput`
+4) Adapt the submith.sh to your architecture and gau_job.tpl if you need to add specific keywords for the gaussian calculation.
+5) Launch `launch_qmmm GlobalInput`
+7) Launch `prep_dichroprot GlobalInput`
+8) All output files will be gathered in the frenkel_spectrum repository.
+9) Launch 'dichroprot FrenkelInput'
+
+

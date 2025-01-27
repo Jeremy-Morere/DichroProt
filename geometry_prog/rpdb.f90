@@ -5,7 +5,7 @@ subroutine rpdb
 use declare
 implicit none
 
-!Initialisation residu number
+!Initialisation residue number
 i = 0     !For aromatic
 j = Narom !For SS
 
@@ -51,7 +51,7 @@ do
 
       do a=1,Nat
          !read atom numbering, name, coordinate and type
-         read(10,'(4x,a7,1x,a4,14x,3f8.3,23x,a1)') at_num, at_name atom_coord(i,a,:), at_type
+         read(10,'(4x,a7,1x,a4,14x,3f8.3,23x,a1)') at_num, at_name, atom_coord(i,a,:), at_type
 
          !add atom to the atom list of the residue
          list_atom(i) = TRIM(list_atom(i))//","//TRIM(at_num)
@@ -62,7 +62,7 @@ do
          if (at_type .eq. "O") atom_charge(i,a) = 8.0d0
          if (at_type .eq. "N") atom_charge(i,a) = 7.0d0
          
-         !Get atome coordinate for computing the 
+         !Get atom coordinates for computing the 
          if (at_name .eq. "CD2") at_arom_1(i,:) = atom_coord(i,a,:)
          if (at_name .eq. "CE2") at_arom_2(i,:) = atom_coord(i,a,:)
       enddo

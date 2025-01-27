@@ -16,7 +16,7 @@ FFLAGS='-O2 -g -c'
 LFLAGS='-lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -O2'
 
 # Defines a .o for any file entering the compilation.
-OBJS='declare.o deal.o com.o distance.o H_build.o H_diag.o rinput.o rlog.o rpdb.o strenght.o prep_convolution.o out_convolution.o convolution.o cpl_stronghest.o cpl_allcomb.o cpl_extend.o cpl_nocoupling.o main_frenkel.o'
+OBJS='declare.o deal.o coc.o distance.o H_build.o H_diag.o rinput.o rlog.o rpdb.o strenght.o prep_convolution.o out_convolution.o convolution.o cpl_stronghest.o cpl_allcomb.o cpl_extend.o cpl_nocoupling.o main_frenkel.o'
 
 # Command line for the creation of the .o files.
 $FC $FFLAGS declare.f90

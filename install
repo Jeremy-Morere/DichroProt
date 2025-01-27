@@ -2,8 +2,9 @@
 
 module purge
 #module load intelmpi/2019.4
-module load mcs_mod/compenv/intel/2019.4
-
+#module load mcs_mod/compenv/intel/2019.4
+module load intel/2019.4
+module load mkl/2019.4
 
 ### Compilation parameters
 
@@ -12,12 +13,10 @@ FC='ifort'
 # Flags for execution
 FFLAGS='-O2 -g -c'
 # Sets the libraries 
-LFLAGS='-lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -O2'
+LFLAGS='-lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -O3'
 
 
 ### Geometry analysis compilation
-
-if [ 1 = 2 ]; then 
 
 cd geometry_prog
 
@@ -25,7 +24,7 @@ echo "
 Geometry analysis compilation ..."
 
 # Defines a .o for any file entering the compilation.
-OBJS='declare.o deal.o strip_space.o find_number_PAR.o rpdb.o com.o normal_vect.o distance.o angle.o min_distance.o cnorm.o store_ss.o woutput.o main_geometry.o'
+OBJS='declare.o deal.o strip_space.o find_number_PAR.o rpdb.o coc.o normal_vect.o distance.o angle.o min_distance.o cnorm.o store_ss.o woutput.o main_geometry.o'
 
 # Command line for the creation of the .o files.
 $FC $FFLAGS declare.f90
@@ -37,37 +36,58 @@ $FC $OBJS $LFLAGS -o geometry
 # Removal of the .o files after their compilation into the main file.
 rm -f *.o *.mod
 
+mv geometry ../executable
+
 echo "The geometry executable has been created
 "
 
+#mv geometry ../executable
+
 cd ..
-fi
+###
 
 ### Frenkel coupling compilation
 cd frenkel_prog
 
-echo "Frenkel coupling compilation ..."
+echo "dichroprot compilation ..."
 
 # Defines a .o for any file entering the compilation.
-OBJS='declare.o deal.o rinput.o rlog.o rpdb.o com.o distance.o dip_dip_coupling.o H_build.o H_diag.o convolution.o cpl_perturbation.o cpl_matrix.o main_frenkel.o'
+OBJS='declare.o deal.o rinput.o rlog.o rpdb.o coc.o distance.o dip_dip_coupling.o H_build.o H_diag.o convolution.o cpl_perturbation.o cpl_matrix.o cpl_superposition.o main_frenkel.o'
 
 # Command line for the creation of the .o files.
 $FC $FFLAGS declare.f90
 $FC $FFLAGS *.f90
 
 # Creation of the main file.
-$FC $OBJS $LFLAGS -o frenkel
+$FC $OBJS $LFLAGS -o dichroprot
 
 # Removal of the .o files after their compilation into the main file.
 rm -f *.o *.mod
 
-echo "The frenkel executable has been created
+mv dichroprot ../executable
+
+echo "The dichroprot executable has been created
 "
+cd ..
+
+
+### Other program compilation
+
+echo "Other programs compilation ..."
+cd other_prog
+echo "   - Average spectrum compilation "
+$FC $LFLAGS average_spectrum.f90 -o average_spectrum
+
+# Removal of the .o files after their compilation into the main file.
+rm -f *.o *.mod
+mv average_spectrum ../executable
+
+echo "All other executables has been created
+"
+ 
 
 cd ..
-#mv frenkel_prog/frenkel geometry_prog/geometry executable
-
-mv frenkel_prog/frenkel executable
+###
 
 echo "All executables has been moved to the executable repository
 "

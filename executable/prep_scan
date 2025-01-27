@@ -8,9 +8,10 @@ prmtop_file=`grep 'PRMTOP' $input | awk '{print $3}'`
 pdb_file=${prmtop_file%".prmtop"}
 lot=`grep 'Level of theory' $input | awk '{print $5}'`
 NStates=`grep 'Number of state' $input | awk '{print $5}'`
-full=`grep 'Full calculation' $input | awk '{print $4}'`
+full=`grep 'Full contribution' $input | awk '{print $4}'`
 pertur=`grep 'Perturbation' $input | awk '{print $3}'`
 matrix=`grep 'Matrix' $input | awk '{print $3}'`
+superp=`grep 'Superposition' $input | awk '{print $3}'`
 lower=`grep 'lower limit' $input | awk '{print $4}'`
 upper=`grep 'upper limit' $input | awk '{print $4}'`
 resolution=`grep 'resolution' $input | awk '{print $3}'`
@@ -30,10 +31,33 @@ module load amber/16
 cpptraj < trajin_pdb
 
 N_frame=`ls | wc -l`
+N_frame=$((N_frame-1))
+
+#In case some error appear in the creation of the .pdb file
+#We erase the corrupted frame and renumber every other one
+for (( i=1; i<=$N_frame; i++ )); do
+ test_X=`head -n2 $pdb_file.$i | tail -n1 | awk '{print $6}'`
+ test_Y=`head -n2 $pdb_file.$i | tail -n1 | awk '{print $7}'`
+ test_Z=`head -n2 $pdb_file.$i | tail -n1 | awk '{print $8}'`
+
+ if [ "$test_X" = "0.000" ]; then
+  if [ "$test_Y" = "0.000" ]; then
+   if [ "$test_Z" = "0.000" ]; then
+echo "elimine frame $i"
+    for (( j=$(( $i + 1 )); j<=$N_frame; j++ )); do
+     mv $pdb_file.$j $pdb_file.$(( $j - 1 ))
+    done
+    i=$(( $i - 1))
+    N_frame=$(( $N_frame - 1))
+   fi
+  fi
+ fi
+done
+
 cd ..
 
 
-for (( i=1; i<=$((N_frame-1)); i++ )); do
+for (( i=1; i<=$N_frame; i++ )); do
 
   mkdir frame_$i
 
@@ -57,12 +81,13 @@ Number of frame : $N_frame
 Level of theory : $lot
 Number of state : $NStates
 
-Full calculation : $full
+Full contribution : $full
 
 ##Parameter for Frenkel coupling
 #Type of coupling (chose one)
 Perturbation :     $pertur
 Matrix :           $matrix
+Superposition :    $superp
 
 #Specify the spectral window (nm)
 lower limit :    $lower
@@ -81,5 +106,8 @@ fwhm :    $fwhm
 
   cd ..
 
-
 done
+
+echo "Number of frame : $N_frame" >> $input
+rm -rf conformation
+

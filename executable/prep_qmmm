@@ -155,10 +155,6 @@ module load amber/16
 module load gaussian/09/pgi
 
 sander -O -i mdgau-min -o test.out -c protein.rst -p $prmtop_file -r test.rst -x test.rst
-
-echo done >> $work_file/terminaison
 " > submith.sh
-
-touch terminaison
 
 echo "Check the submith.sh and gau_job.tpl files before using launch_qmmm"

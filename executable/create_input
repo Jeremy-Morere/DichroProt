@@ -13,12 +13,13 @@ trajectory :    protein.nc
 Level of theory : B3LYP/6-311+G**
 Number of state : 5
 
-Full calculation : n
+Full contribution : n
 
 ##Parameter for Frenkel coupling
 #Type of coupling (chose one)
 Perturbation :     y
 Matrix :           y
+Superposition :    y
 
 #Specify the spectral window (nm)
 lower limit :    250
@@ -29,7 +30,7 @@ upper limit :    320
 resolution :     0.5
 
 #Full width at half maximum (eV)
-fwhm :    0.2
+fwhm :    0.12
 
-"> QmmmInput 
+"> GlobalInput 
 

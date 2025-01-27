@@ -11,7 +11,7 @@ if (allocated(res_num)) deallocate(res_num)
 if (allocated(transi_band)) deallocate(transi_band)
 
 
-!Residus and atoms properties
+!Residue and atom properties
 if (allocated(ground_energy)) deallocate(ground_energy)
 if (allocated(energy)) deallocate(energy)
 if (allocated(atom_coord)) deallocate(atom_coord)
@@ -29,6 +29,16 @@ if (allocated(freq)) deallocate(freq)
 if (allocated(H)) deallocate(H)
 if (allocated(eigval)) deallocate(eigval)
 if (allocated(work)) deallocate(work)
+
+!Rotatory and oscillator strengths
+if (allocated(Tino)) deallocate(Tino)
+if (allocated(Tino_a)) deallocate(Tino_a)
+if (allocated(Tino_e)) deallocate(Tino_e)
+if (allocated(Tino_b)) deallocate(Tino_b)
+if (allocated(Tino_f)) deallocate(Tino_f)
+if (allocated(energy_tempo)) deallocate(energy_tempo)
+if (allocated(rot_mat)) deallocate(rot_mat)
+if (allocated(rot_pert)) deallocate(rot_pert)
 
 !Convolution
 if (allocated(energy_c)) deallocate(energy_c)

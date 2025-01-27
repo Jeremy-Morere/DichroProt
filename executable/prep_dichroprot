@@ -4,12 +4,14 @@ input=$1
 
 mkdir frenkel_spectrum
 mkdir frenkel_spectrum/G09_output
+mkdir frenkel_spectrum/G09_fchk
 
 pdb_file=`grep 'PDB' $input | awk '{print $3}'`
 
 for res in R-* ; do
  for i in {0..5}; do 
   mv $res/state_$i/old.gau_job.log frenkel_spectrum/G09_output/$res-S$i.log
+  mv $res/state_$i/gau_job.fchk frenkel_spectrum/G09_fchk/$res-S$i.fchk
  done
  rm -rf $res
 done
@@ -55,7 +57,7 @@ echo '#----#
 
 grep PDB ../$input >> FrenkelInput
 grep "Number of state" ../$input >> FrenkelInput
-grep "Full calculation" ../$input >> FrenkelInput
+grep "Full contribution" ../$input >> FrenkelInput
 
 echo '
 ##Parameter for Frenkel coupling
@@ -63,6 +65,7 @@ echo '
 
 grep 'Perturbation' ../$input >> FrenkelInput
 grep 'Matrix' ../$input >> FrenkelInput
+grep 'Superposition' ../$input >> FrenkelInput
 
 echo '
 #Specify the spectral window (nm)' >> FrenkelInput

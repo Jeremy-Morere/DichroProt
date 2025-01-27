@@ -23,25 +23,27 @@ integer             :: atom,Maxatom,AtomNum
 integer             :: Nband
 integer,allocatable :: transi_band(:,:)
 
-!Residus and atoms properties
+!Residue and atom properties
 real*8,allocatable :: energy(:,:), ground_energy(:), rotatory(:,:), freq(:,:)
 real*8,allocatable :: el_dip_perm(:,:,:), el_dip(:,:,:), mag_dip(:,:,:)
 real*8             :: Charge
 character*2        :: at_type
 
 !option
-character*1         :: matrix_t, perturbation_t, full_t
-logical             :: matrix, perturbation, full
-integer,allocatable :: comb(:)
+character*1         :: matrix_t, perturbation_t, superposition_t, full_t
+logical             :: matrix, perturbation, superposition, full
 
 !Hamiltonian
 real*8,allocatable :: H(:,:),eigval(:),work(:)
 integer            :: d,od1,od2
 integer            :: r1,r2,ri,s1,s2,si,t1,t2,ti
 
-!Rotatory and oscillator strenght
-!real*8 :: PS1,PS2,PS3
-real*8 :: cross(3), vect(3)
+!Rotatory and oscillator strengths
+real*8             :: cross(3), vect(3)
+real*8,allocatable :: Tino(:), Tino_a(:), Tino_e(:), Tino_b(:), Tino_f(:)
+real*8             :: mat, mat_mag_el, mat_el_el
+real*8,allocatable :: energy_tempo(:)
+real*8,allocatable :: rot_mat(:), rot_pert(:)
 
 !Convolution
 integer            :: npoint,npeak
@@ -74,19 +76,15 @@ character*256,allocatable :: list_atom(:)
 real*8,allocatable:: min_distance_list(:,:)
 real*8            :: min_val
 
-
-real*8 :: Tino_a, Tino_e, Tino_b, Tino_f
-
-
 !Parameters
-real*8,parameter :: pi = 2*dacos(0.0d0)
+real*8,parameter :: pi = dacos(-1.0d0)
 real*8,parameter :: Na = 6.02214076d23 !mol-1
 real*8,parameter :: beta = 1.2563d0
+real*8,parameter :: au_cgs = 4.714436d2
 
 !--forbiden name--!
 ! res1, s1i, s1f, res2, s2i, s2f
 ! PS1, PS2, PS3
 ! rot
-
 
 end module declare

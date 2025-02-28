@@ -1,33 +1,44 @@
 #!/bin/bash
 
 input=$1
+NStates=`grep 'Number of state' $input | awk '{print $5}'`
+full=`grep 'Full contribution' $input | awk '{print $4}'`
 
-mkdir frenkel_spectrum
-mkdir frenkel_spectrum/G09_output
-mkdir frenkel_spectrum/G09_fchk
+mkdir DichroProt
+mkdir DichroProt/G09_output
+mkdir DichroProt/G09_fchk
 
 pdb_file=`grep 'PDB' $input | awk '{print $3}'`
 
+#Gather all Gaussian output
 for res in R-* ; do
- for i in {0..5}; do 
-  mv $res/state_$i/old.gau_job.log frenkel_spectrum/G09_output/$res-S$i.log
-  mv $res/state_$i/gau_job.fchk frenkel_spectrum/G09_fchk/$res-S$i.fchk
- done
+ mv $res/state_1/old.gau_job.log DichroProt/G09_output/$res-S1.log
+ mv $res/state_1/gau_job.fchk DichroProt/G09_fchk/$res-S1.fchk
+ 
+ if [ "$full" = "y" ]; then
+  mv $res/state_0/old.gau_job.log DichroProt/G09_output/$res-S0.log
+  mv $res/state_0/gau_job.fchk DichroProt/G09_fchk/$res-S0.fchk 
+
+  for i in {2..$NStates}; do 
+   mv $res/state_$i/old.gau_job.log DichroProt/G09_output/$res-S$i.log
+   mv $res/state_$i/gau_job.fchk DichroProt/G09_fchk/$res-S$i.fchk
+  done
+ fi
  rm -rf $res
 done
 
-cp $pdb_file frenkel_spectrum
-cp geometry.dat frenkel_spectrum
+cp $pdb_file DichroProt
+cp geometry.dat DichroProt
 
-cd frenkel_spectrum 
+cd DichroProt
 
-#Preparation of the Frenkel input
+#Preparation of the DichroProt input
 
-echo '#%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
-# Input for Frenkel coupling #
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
+echo "#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
+# Input for DichroProt coupling #
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
 
-#--Aromatic--#' > FrenkelInput
+#--Aromatic--#' > DichroProtInput
 
 for res in G09_output/R-arom-*-S1.log; do
  if [[ "$res" != "G09_output/R-arom-*-S1.log" ]]; then
@@ -35,11 +46,11 @@ for res in G09_output/R-arom-*-S1.log; do
   num=${num#"G09_output/R-arom-"}
   file=${res%"-S1.log"}
   file=${file#"G09_output/"}
-  echo "$file $num" >> FrenkelInput
+  echo "$file $num" >> DichroProtInput
  fi
 done
 
-echo '#--SS Bridge--#' >> FrenkelInput
+echo '#--SS Bridge--#' >> DichroProtInput
 
 for res in G09_output/R-ss-*-S1.log; do
  if [[ "$res" != "G09_output/R-ss-*-S1.log" ]]; then
@@ -48,39 +59,39 @@ for res in G09_output/R-ss-*-S1.log; do
   file=${res%"-S1.log"}
   file=${file#"G09_output/"}
   IFS=- read -r num1 num2 <<< $num 
-  echo "$file $num1 $num2" >> FrenkelInput
+  echo "$file $num1 $num2" >> DichroProtInput
  fi
 done
 
 echo '#----#
-' >> FrenkelInput
+' >> DichroProtInput
 
-grep PDB ../$input >> FrenkelInput
-grep "Number of state" ../$input >> FrenkelInput
-grep "Full contribution" ../$input >> FrenkelInput
-
-echo '
-##Parameter for Frenkel coupling
-#Type of coupling (chose one)' >> FrenkelInput
-
-grep 'Perturbation' ../$input >> FrenkelInput
-grep 'Matrix' ../$input >> FrenkelInput
-grep 'Superposition' ../$input >> FrenkelInput
+grep PDB ../$input >> DichroProtInput
+grep "Number of state" ../$input >> DichroProtInput
+grep "Full contribution" ../$input >> DichroProtInput
 
 echo '
-#Specify the spectral window (nm)' >> FrenkelInput
+##Parameter for coupling
+#Type of coupling (chose one)' >> DichroProtInput
 
-grep 'lower limit' ../$input >> FrenkelInput
-grep 'upper limit' ../$input >> FrenkelInput
+grep 'Perturbation' ../$input >> DichroProtInput
+grep 'Matrix' ../$input >> DichroProtInput
+grep 'Superposition' ../$input >> DichroProtInput
+
+echo '
+#Specify the spectral window (nm)' >> DichroProtInput
+
+grep 'lower limit' ../$input >> DichroProtInput
+grep 'upper limit' ../$input >> DichroProtInput
 
 echo "
 ##Parameter for convolution (Don't touch)
-#Resolution (nm)"  >> FrenkelInput
+#Resolution (nm)"  >> DichroProtInput
 
-grep 'resolution' ../$input >> FrenkelInput
+grep 'resolution' ../$input >> DichroProtInput
 
 echo "
-#Full width at half maximum (eV)" >> FrenkelInput
+#Full width at half maximum (eV)" >> DichroProtInput
 
-grep 'fwhm' ../$input >> FrenkelInput
+grep 'fwhm' ../$input >> DichroProtInput
 

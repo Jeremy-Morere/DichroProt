@@ -1,10 +1,20 @@
 #!/bin/bash
 
+### Path to intel and mkl libraries 
+
 module purge
-#module load intelmpi/2019.4
-#module load mcs_mod/compenv/intel/2019.4
 module load intel/2019.4
 module load mkl/2019.4
+
+### Path to Amber16 and Gaussian09
+
+path_amber='amber/16'
+path_gaussian='gaussian/09/pgi'
+
+cd executable
+  sed -i "/path_amber=/c path_amber='$path_amber'" prep_*
+  sed -i "/path_gaussian=/c path_gaussian='$path_gaussian'" prep_*
+cd ..
 
 ### Compilation parameters
 
@@ -46,13 +56,13 @@ echo "The geometry executable has been created
 cd ..
 ###
 
-### Frenkel coupling compilation
-cd frenkel_prog
+### DrichroProt compilation
+cd dichroprot_prog
 
 echo "dichroprot compilation ..."
 
 # Defines a .o for any file entering the compilation.
-OBJS='declare.o deal.o rinput.o rlog.o rpdb.o coc.o distance.o dip_dip_coupling.o H_build.o H_diag.o convolution.o cpl_perturbation.o cpl_matrix.o cpl_superposition.o main_frenkel.o'
+OBJS='declare.o deal.o rinput.o rlog.o rpdb.o coc.o distance.o dip_dip_coupling.o H_build.o H_diag.o convolution.o cpl_perturbation.o cpl_matrix.o cpl_superposition.o main_dichroprot.o'
 
 # Command line for the creation of the .o files.
 $FC $FFLAGS declare.f90

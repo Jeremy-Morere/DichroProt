@@ -10,6 +10,8 @@ prmtop_file=`grep 'PRMTOP' $input | awk '{print $3}'`
 lot=`grep 'Level of theory' $input | awk '{print $5}'`
 NStates=`grep 'Number of state' $input | awk '{print $5}'`
 work_file=`pwd`
+path_amber='amber/16'
+path_gaussian='gaussian/09/pgi'
 
 # STEP 1: Generate geometry file
 
@@ -18,7 +20,7 @@ geometry $pdb_file
 # Step 2: Create rst file
 
 if [ ! -f "protein.rst" ]; then
-   module load amber/16
+   module load $path_amber
    echo "parm $prmtop_file
 trajin $pdb_file
 
@@ -28,7 +30,7 @@ fi
 
 # Step 3: Create Amber input file
 #Create gaussian template
-echo "# $lot TD=(NStates=$NStates,root=x) density" > gau_job.tpl
+echo "# $lot TD=(NStates=$NStates,root=@) density" > gau_job.tpl
 
 #Create mdgau-min template
 echo "production
@@ -151,10 +153,10 @@ echo "#!/bin/bash
 #SBATCH -t 16-00:00:00
 
 module purge
-module load amber/16
-module load gaussian/09/pgi
+module load  $path_amber
+module load  $path_gaussian
 
 sander -O -i mdgau-min -o test.out -c protein.rst -p $prmtop_file -r test.rst -x test.rst
-" > submith.sh
+" > submit.sh
 
-echo "Check the submith.sh and gau_job.tpl files before using launch_qmmm"
+echo "Check the submit.sh and gau_job.tpl files before using launch_qmmm"

@@ -8,31 +8,31 @@ upper=`grep 'upper limit' $input | awk '{print $4}'`
 prmtop_file=`grep 'PRMTOP' $input | awk '{print $3}'`
 protein_name=${prmtop_file%".prmtop"}
 
-#mkdir spectrum/
-#
+mkdir spectrum/
+
 #Gather information
-#for (( i=1; i<=$N_frame; i++ )); do
-#
-# cd frame_$i
-#  if [ ! -r frenkel_spectrum ]; then
-#   prep_frenkel QmmmInput
-#  fi  
-#
-#  cd frenkel_spectrum
-#
-#  frenkel FrenkelInput | tee frenkel_$i.out
-#  
-#  cp spectrum_matrix.conv        ../../spectrum/matrix_$i.conv
-#  cp spectrum_perturbation.conv  ../../spectrum/perturbation_$i.conv
-#  cp spectrum_superposition.conv ../../spectrum/superposition_$i.conv
-#  cp spectrum_UV.conv		 ../../spectrum/UV_$i.conv
-#  cp frenkel_$i.out              ../../spectrum/
-#
-# cd ../..
-##cd ..
-#done
-#
-#
+for (( i=1; i<=$N_frame; i++ )); do
+
+ cd frame_$i
+  if [ ! -r DichroProt ]; then
+   prep_dichroprot QmmmInput
+  fi  
+
+  cd DichroProt
+
+  dichroprot DichroProtInput | tee dichroprot_$i.out
+  
+  cp spectrum_matrix.conv        ../../spectrum/matrix_$i.conv
+  cp spectrum_perturbation.conv  ../../spectrum/perturbation_$i.conv
+  cp spectrum_superposition.conv ../../spectrum/superposition_$i.conv
+  cp spectrum_UV.conv		 ../../spectrum/UV_$i.conv
+  cp dichroprot_$i.out           ../../spectrum/
+
+ cd ../..
+#cd ..
+done
+
+
 #Compute average
 cd spectrum/
 average_spectrum ../$input

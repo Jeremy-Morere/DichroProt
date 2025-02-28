@@ -18,53 +18,33 @@ for rep in R-*/ ; do
  cd $rep
 
    mkdir state_1
-   cp ../submith.sh state_1
+   cp ../submit.sh state_1
    cp ../gau_job.tpl state_1
    cp mdgau-min protein.rst $prmtop_file state_1
    cd state_1
-    sed -i -e "s/x/1/g" gau_job.tpl
-    sbatch submith.sh
+    sed -i -e "s/@/1/g" gau_job.tpl
+    sbatch submit.sh
    cd ..
  
   if [ "$full" = "y" ]; then
    for i in $( eval echo {2..$NStates}); do
     mkdir state_$i
-    cp ../submith.sh state_$i
+    cp ../submit.sh state_$i
     cp ../gau_job.tpl state_$i
     cp mdgau-min protein.rst $prmtop_file state_$i
     cd state_$i
-     sed -i -e "s/x/$i/g" gau_job.tpl
-     sbatch submith.sh
+     sed -i -e "s/@/$i/g" gau_job.tpl
+     sbatch submit.sh
     cd ..
    done
   
    mkdir state_0
-   cp ../submith.sh state_0
+   cp ../submit.sh state_0
    cp mdgau-min protein.rst $prmtop_file state_0
    cd state_0
     echo "# $lot density" > gau_job.tpl
-    sbatch submith.sh
+    sbatch submit.sh
    cd ..
   fi
  cd ..
 done
-
-#if [[ -f "terminaison" ]]; then
-# rm terminaison
-#fi
-#touch terminaison
-#
-#N=`cat terminaison | wc -l`
-#while [ $N -lt $(( $Nresid * $(( $NStates + 1)) )) ]; do
-#   sleep 60
-#   N=`cat $work_file/terminaison | wc -l`
-#done
-#rm terminaison
-# echo "done"
-#
-#prep_frenkel QmmmInput
-#
-#cd frenkel_spectrum
-#frenkel FrenkelInput
-#cd ..
-

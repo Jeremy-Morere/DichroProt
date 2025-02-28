@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#Launch QM/MM calculations in each working directories
+
 input=$1
 
 N_frame=`grep 'Number of frame' $input | awk '{print $5}'`
@@ -7,8 +9,19 @@ N_frame=`grep 'Number of frame' $input | awk '{print $5}'`
 
 for (( i=1; $i<=$((N_frame)); i++ )); do
 
-cd frame_$i
-   launch_qmmm QmmmInput
-cd ..
-
+ cd frame_$i
+   
+# If scan, copy paste global template and sumbmission files to each working directory
+  if [  -f ./../gau_job.tpl ]; then
+      cp ../gau_job.tpl .
+  fi
+  
+  if [  -f ./../submit.sh ]; then
+      cp ./../submit.sh .
+  fi
+    
+# Launch QM/MM calculation
+  launch_qmmm QmmmInput
+ cd ..
+     
 done

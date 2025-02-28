@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Prepare all working directories for a trajectory scan.
+
 input=$1
 
 # Read input
@@ -16,18 +18,22 @@ lower=`grep 'lower limit' $input | awk '{print $4}'`
 upper=`grep 'upper limit' $input | awk '{print $4}'`
 resolution=`grep 'resolution' $input | awk '{print $3}'`
 fwhm=`grep 'fwhm' $input | awk '{print $3}'`
+step=`grep 'sampling interval' $input | awk '{print $4}'`
+path_amber='amber/16'
+path_gaussian='gaussian/09/pgi'
 
-# Create conformation
+
+# STEP 1:  Create conformation
 mkdir conformation
 cd conformation
 
 echo "parm ../$prmtop_file
-trajin ../$trajectory 1 last 20
+trajin ../$trajectory 1 last $step
 
 trajout $pdb_file pdb multi
 " > trajin_pdb
 
-module load amber/16
+module load $path_amber
 cpptraj < trajin_pdb
 
 N_frame=`ls | wc -l`
@@ -67,9 +73,10 @@ for (( i=1; i<=$N_frame; i++ )); do
 
   cd frame_$i
 
-echo "#%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
-# Input for Frenkel coupling #
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
+# STEP 2: Create Input file
+echo "#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
+# Input for DichroProt coupling #
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
 
 
 ##Parameter for Amber and gaussian
@@ -83,7 +90,7 @@ Number of state : $NStates
 
 Full contribution : $full
 
-##Parameter for Frenkel coupling
+##Parameter for coupling
 #Type of coupling (chose one)
 Perturbation :     $pertur
 Matrix :           $matrix
@@ -108,6 +115,32 @@ fwhm :    $fwhm
 
 done
 
-echo "Number of frame : $N_frame" >> $input
+#Add the number of frame into the Input
+if grep -q -F "Number of frame :" $input; then
+  sed -i '/Number of frame/d' $input
+  echo "Number of frame : $N_frame" >> $input 
+else
+  echo "Number of frame : $N_frame" >> $input
+fi
+
 rm -rf conformation
+
+# Step 3: Create gaussian template 
+echo "# $lot TD=(NStates=$NStates,root=@) density" > gau_job.tpl
+
+
+# STEP 4: Create submition file
+echo "#!/bin/bash
+#SBATCH -N 1
+#SBATCH -p std
+#SBATCH -J CD-amber
+#SBARCH -n 16
+#SBATCH -t 16-00:00:00
+
+module purge
+module load $path_amber
+module load $path_gaussian
+
+sander -O -i mdgau-min -o test.out -c protein.rst -p $prmtop_file -r test.rst -x test.rst
+" > submit.sh
 
